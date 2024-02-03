@@ -42,12 +42,12 @@ export class Database extends UserDatabaseInteraction {
   // =========================================================================================== //
 
   async #isUserExists(email) {
-    const candidate = await this.#findUserRequest("UserBase", "userEmail", email)
+    const candidate = await super.findRequest("UserBase", "userEmail", email)
     if (candidate) throw await ApiError.BadRequest()
   }
   
   async #isAccess(userId){
-    const candidate = await this.#findUserRequest("UserParams", "userId", userId)
+    const candidate = await super.findRequest("UserParams", "userId", userId)
     if(candidate.accessType === "user") throw await new ApiError.PermissionDenied()
     if(candidate.accessType === "staff") throw await new ApiError.PermissionDenied()
   }
