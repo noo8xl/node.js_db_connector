@@ -11,11 +11,10 @@ export const api = {
   timeout: 30,
 };
 export const mongoDb = {
+  user: process.env.MONGO_DB_USER,
   uri: process.env.MONGO_DB_LINK,
   name: process.env.MONGO_DB_NAME,
   password: process.env.MONGO_DB_PASSWORD,
-  user: process.env.MONGO_DB_USER
-  
 };
 // export const mysqlDb = {
 //   host: process.env.MYSQL_HOST,

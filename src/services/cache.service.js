@@ -19,10 +19,10 @@ export class Cache {
       await cl.hSet(c.userId, c)
     } catch (e) {
       throw await ApiError.ServerError()
-    } finally {
-      await cl.disconnect();
-      return c
-    }
+    } 
+    
+    await cl.disconnect();
+    return c
   }
 
   async getUserCache(key){
@@ -35,10 +35,10 @@ export class Cache {
       console.log("user c is =>\n", c);
     } catch (e) {
       throw await ApiError.ServerError()
-    } finally {
-      await cl.disconnect();
-      return c
-    }
+    } 
+    
+    await cl.disconnect();
+    return c
   }
 
   // ============================================================================ //

@@ -21,10 +21,10 @@ export class UserDatabaseInteraction {
       insId = result.insertedId.toString()
     } catch (e) {
       throw await ApiError.ServerError()
-    } finally {
-      await cl.close()
-      return insId
-    }
+    } 
+    
+    await cl.close()
+    return insId
   }
 
   // async insertMultiplyDataRequest(colName, dto) { // dto -> User is instance
@@ -61,10 +61,10 @@ export class UserDatabaseInteraction {
       result = await colection.findOne(filter)
     } catch (e) {
       throw await ApiError.ServerError()
-    } finally {
-      await cl.close()
-      return result
     }
+
+    await cl.close()
+    return result
   }
 
   async findMultFilterRequest(colName, filterData) {
@@ -86,10 +86,10 @@ export class UserDatabaseInteraction {
       result = await colection.findOne(filter)
     } catch (e) {
       throw await ApiError.ServerError()
-    } finally {
-      await cl.close()
-      return result
-    }
+    } 
+
+    await cl.close()
+    return result
   }
 
 
@@ -109,9 +109,9 @@ export class UserDatabaseInteraction {
       console.log("result.modifiedCount => ", result.modifiedCount);
     } catch (e) {
       throw await ApiError.ServerError()
-    } finally {
-      await cl.close()
     }
+
+    await cl.close()
     if (result.modifiedCount < 1) throw await ApiError.ServerError()
     return true
   }
@@ -128,10 +128,9 @@ export class UserDatabaseInteraction {
       await colection.deleteOne(filter)
     } catch (e) {
       throw await ApiError.ServerError()
-    } finally {
-      await cl.close()
-      return true
-    }
+    } 
+    await cl.close()
+    return true
   }
 
 
