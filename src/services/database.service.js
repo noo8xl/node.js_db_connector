@@ -1,25 +1,30 @@
 import { TwoStepParams, User, UserDetails } from '../types/user.types.js';
-import { UserDatabaseInteraction } from './database.core.js';
+import { DatabaseInteraction } from './database.core.js';
 import { Cache } from './cache.service.js';
 import { ObjectId } from "mongodb"
 import ApiError from '../exceptions/apiError.exption.js';
 
-export class Database extends UserDatabaseInteraction {
+export class Database extends DatabaseInteraction {
 
   constructor () {
     super()
+    super.initConnection()
   }
 
   // getUser => looking for user by email or id
   async getUser(str) { // returned response will => {user: {}, tokenPair: {}}
-    return await this.#findUserRequest(str)
+    const user = await this.#findUserRequest(str)
+    await super.disconnectClient()
+    return user
   }
 
   async saveUser(dto) { // return inserted userId 
     await this.#isUserExists(dto.userEmail)
-    return await this.#insertUserRequest(dto)
+    const userId = await this.#insertUserRequest(dto)
+    await super.disconnectClient()
+    return userId
 }
-
+  
   async updateUser(colName, f, v, dto){
     
     // colName -> db document name 
@@ -27,14 +32,18 @@ export class Database extends UserDatabaseInteraction {
     // v -> filter value name (where val is)
     // dto -> obj with data for update
 
-    return await this.#updateUserRequest(colName, f, v, dto) 
+    const result = await this.#updateUserRequest(colName, f, v, dto) 
+    await super.disconnectClient()
+    return result
   }
 
 
   // ---> * available only for < admin > user * <---
   async deleteUser(userId, customerId){
     await this.#isAccess(userId) // chceck a permissoin
-    return await this.#deleteUserRequest(customerId) // delete current user 
+    const result = await this.#deleteUserRequest(customerId) // delete current user 
+    await super.disconnectClient()
+    return result
   }
 
   // =========================================================================================== //
@@ -44,12 +53,14 @@ export class Database extends UserDatabaseInteraction {
   async #isUserExists(email) {
     const candidate = await super.findRequest("UserBase", "userEmail", email)
     if (candidate) throw await ApiError.BadRequest()
+    await super.disconnectClient()
   }
   
   async #isAccess(userId){
     const candidate = await super.findRequest("UserParams", "userId", userId)
     if(candidate.accessType === "user") throw await new ApiError.PermissionDenied()
     if(candidate.accessType === "staff") throw await new ApiError.PermissionDenied()
+    await super.disconnectClient()
   }
   
   async #insertUserRequest(dto) {
@@ -89,7 +100,7 @@ export class Database extends UserDatabaseInteraction {
 
     await super.insertRequest("UserBase", paramsDto)
     await super.insertRequest("TwoStepParams", twoStepDto)
-
+    await super.disconnectClient()
     return resultId
   }
 
@@ -138,23 +149,29 @@ export class Database extends UserDatabaseInteraction {
     c = await cache.setUserCache({ userBase, userDetails})
 
     response.user = c
+    await super.disconnectClient()
     return response
   }
 
   async #updateUserRequest(colName, fName, fVal, uDoc) {
-    return super.updateRequest(colName, fName, fVal, uDoc)
+    const result = super.updateRequest(colName, fName, fVal, uDoc)
+    await super.disconnectClient()
+    return result
   }
 
   async #deleteUserRequest(customerId) {
 
     // get all user data
+    let result
     const userDocList = []
 
     for (let i = 0; i < userDocList.length -1 ; i++) 
       await super.deleteRequest(userDocList[i], "userId", customerId) 
 
     // in the end of -> delete base user document <-
-    return super.deleteRequest("UserBase", fName, fVal)
+    result = super.deleteRequest("UserBase", fName, fVal)
+    await super.disconnectClient()
+    return result
   }
 
 
